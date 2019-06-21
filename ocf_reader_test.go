@@ -29,6 +29,7 @@ func TestReadOCFHeaderMagicBytes(t *testing.T) {
 //
 
 func testCannotReadOCFHeader(t *testing.T, input []byte, expected ...string) {
+	t.Helper()
 	_, err := NewOCFReader(bytes.NewBuffer(append([]byte("Obj\x01"), input...)))
 	ensureError(t, err, append([]string{"cannot read OCF header"}, expected...)...)
 }
@@ -69,14 +70,14 @@ func TestReadOCFHeaderMetadataBinaryReaderMapValue(t *testing.T) {
 // readOCFHeader, avro.codec
 
 func TestReadOCFHeaderMetadataAvroCodecUnknown(t *testing.T) {
-	testCannotReadOCFHeader(t, []byte("\x02\x14avro.codec\x06bad\x00"), "cannot read OCF header", "unrecognized compression", "bad")
+	testCannotReadOCFHeader(t, []byte("\x02\x14avro.codec\x06bad\x000123456789ABCDEF"), "cannot read OCF header", "unrecognized compression", "bad")
 }
 
 // readOCFHeader, avro.schema
 
 func TestReadOCFHeaderMetadataAvroSchemaMissing(t *testing.T) {
-	testCannotReadOCFHeader(t, []byte("\x00"), "without avro.schema")
-	testCannotReadOCFHeader(t, []byte("\x02\x16avro.schema\x04{}\x00"), "invalid avro.schema")
+	testCannotReadOCFHeader(t, []byte("\x02\x14avro.codec\x08null\x000123456789ABCDEF"), "without avro.schema")
+	testCannotReadOCFHeader(t, []byte("\x02\x16avro.schema\x04{}\x000123456789ABCDEF"), "invalid avro.schema")
 }
 
 // readOCFHeader, sync marker
