@@ -15,6 +15,7 @@ import (
 	"io"
 	"math"
 	"reflect"
+	"strings"
 )
 
 func makeMapCodec(st map[string]*Codec, namespace string, schemaMap map[string]interface{}) (*Codec, error) {
@@ -261,8 +262,18 @@ func genericMapTextEncoder(buf []byte, datum interface{}, defaultCodec *Codec, c
 			return nil, err
 		}
 		buf = append(buf, ':')
-		// Encode value
-		buf, err = fieldCodec.textualFromNative(buf, value)
+
+		b, err := fieldCodec.textualFromNative(nil, value)
+		if err != nil {
+			return nil, fmt.Errorf("cannot encode textual map: value for %q does not match its schema: %s", key, err)
+		}
+
+		parts := strings.SplitN(string(b), ":", 2)
+		if len(parts) > 1 {
+			b = []byte(strings.TrimRight(parts[1], "}]"))
+		}
+
+		buf = append(buf, b...)
 		if err != nil {
 			// field was specified in datum; therefore its value was invalid
 			return nil, fmt.Errorf("cannot encode textual map: value for %q does not match its schema: %s", key, err)
