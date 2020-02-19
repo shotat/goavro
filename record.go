@@ -224,6 +224,9 @@ func makeRecordCodec(st map[string]*Codec, enclosingNamespace string, schemaMap 
 			destMap[fieldName] = fieldValue
 		}
 		datum = destMap
+		// NOTE: Setting `defaultCodec == nil` instructs genericMapTextEncoder
+		// to return an error when a field name is not found in the
+		// codecFromFieldName map.
 		return genericMapTextEncoder(buf, datum, nil, codecFromFieldName)
 	}
 
@@ -248,6 +251,9 @@ func makeRecordCodec(st map[string]*Codec, enclosingNamespace string, schemaMap 
 			destMap[fieldName] = fieldValue
 		}
 		datum = destMap
+		// NOTE: Setting `defaultCodec == nil` instructs genericMapTextEncoder
+		// to return an error when a field name is not found in the
+		// codecFromFieldName map.
 		return simpleRecordEncoder(buf, datum, codecFromFieldName)
 	}
 
@@ -314,4 +320,3 @@ func getFirstElem(m map[string]interface{}) interface{} {
 	}
 	return nil
 }
-

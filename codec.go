@@ -52,11 +52,10 @@ type Codec struct {
 	schemaCanonical string
 	typeName        *name
 
-	nativeFromTextual func([]byte) (interface{}, []byte, error)
-	binaryFromNative  func([]byte, interface{}) ([]byte, error)
-	nativeFromBinary  func([]byte) (interface{}, []byte, error)
-	textualFromNative func([]byte, interface{}) ([]byte, error)
-	// optional
+	nativeFromTextual       func([]byte) (interface{}, []byte, error)
+	binaryFromNative        func([]byte, interface{}) ([]byte, error)
+	nativeFromBinary        func([]byte) (interface{}, []byte, error)
+	textualFromNative       func([]byte, interface{}) ([]byte, error)
 	simpleTextualFromNative func([]byte, interface{}) ([]byte, error)
 
 	Rabin uint64
@@ -473,6 +472,9 @@ func (c *Codec) TextualFromNative(buf []byte, datum interface{}) ([]byte, error)
 	return newBuf, nil
 }
 
+// SimpleTextualFromNative converts Go native data types to Avro data in JSON text format
+// like TextualFromNative. The key difference is that SimpleTextualFromNative yields JSON text
+// without embedding type information.
 func (c *Codec) SimpleTextualFromNative(buf []byte, datum interface{}) ([]byte, error) {
 	var newBuf []byte
 	var err error

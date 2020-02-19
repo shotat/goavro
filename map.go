@@ -261,7 +261,6 @@ func genericMapTextEncoder(buf []byte, datum interface{}, defaultCodec *Codec, c
 			return nil, err
 		}
 		buf = append(buf, ':')
-
 		// Encode value
 		buf, err = fieldCodec.textualFromNative(buf, value)
 		if err != nil {
