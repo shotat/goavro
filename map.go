@@ -10,7 +10,6 @@
 package goavro
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -263,25 +262,10 @@ func genericMapTextEncoder(buf []byte, datum interface{}, defaultCodec *Codec, c
 		}
 		buf = append(buf, ':')
 
-		b, err := fieldCodec.textualFromNative(nil, value)
+		buf, err := fieldCodec.textualFromNative(buf, value)
 		if err != nil {
 			return nil, fmt.Errorf("cannot encode textual map: value for %q does not match its schema: %s", key, err)
 		}
-
-		var v interface{}
-		if err := json.Unmarshal(b, &v); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal")
-		}
-
-		if vm, ok := v.(map[string]interface{}); ok {
-			v = getFirstElem(vm)
-		}
-		// f := getFirstElem(v)
-		elem, err := json.Marshal(v)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal")
-		}
-		buf = append(buf, elem...)
 
 		buf = append(buf, ',')
 	}
@@ -290,13 +274,6 @@ func genericMapTextEncoder(buf []byte, datum interface{}, defaultCodec *Codec, c
 		return append(buf[:len(buf)-1], '}'), nil
 	}
 	return append(buf, '}'), nil
-}
-
-func getFirstElem(m map[string]interface{}) interface{} {
-	for _, v := range m {
-		return v
-	}
-	return nil
 }
 
 // convertMap converts datum to map[string]interface{} if possible.
