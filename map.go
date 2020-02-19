@@ -10,12 +10,12 @@
 package goavro
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"math"
 	"reflect"
-	"strings"
 )
 
 func makeMapCodec(st map[string]*Codec, namespace string, schemaMap map[string]interface{}) (*Codec, error) {
@@ -268,16 +268,21 @@ func genericMapTextEncoder(buf []byte, datum interface{}, defaultCodec *Codec, c
 			return nil, fmt.Errorf("cannot encode textual map: value for %q does not match its schema: %s", key, err)
 		}
 
-		parts := strings.SplitN(string(b), ":", 2)
-		if len(parts) > 1 {
-			b = []byte(strings.TrimRight(parts[1], "}]"))
+		var v interface{}
+		if err := json.Unmarshal(b, &v); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal")
 		}
 
-		buf = append(buf, b...)
-		if err != nil {
-			// field was specified in datum; therefore its value was invalid
-			return nil, fmt.Errorf("cannot encode textual map: value for %q does not match its schema: %s", key, err)
+		if vm, ok := v.(map[string]interface{}); ok {
+			v = getFirstElem(vm)
 		}
+		// f := getFirstElem(v)
+		elem, err := json.Marshal(v)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal")
+		}
+		buf = append(buf, elem...)
+
 		buf = append(buf, ',')
 	}
 
@@ -285,6 +290,13 @@ func genericMapTextEncoder(buf []byte, datum interface{}, defaultCodec *Codec, c
 		return append(buf[:len(buf)-1], '}'), nil
 	}
 	return append(buf, '}'), nil
+}
+
+func getFirstElem(m map[string]interface{}) interface{} {
+	for _, v := range m {
+		return v
+	}
+	return nil
 }
 
 // convertMap converts datum to map[string]interface{} if possible.
