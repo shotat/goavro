@@ -248,13 +248,13 @@ func makeRecordCodec(st map[string]*Codec, enclosingNamespace string, schemaMap 
 			destMap[fieldName] = fieldValue
 		}
 		datum = destMap
-		return recordEncoder(buf, datum, codecFromFieldName)
+		return simpleRecordEncoder(buf, datum, codecFromFieldName)
 	}
 
 	return c, nil
 }
 
-func recordEncoder(buf []byte, datum interface{}, codecFromKey map[string]*Codec) ([]byte, error) {
+func simpleRecordEncoder(buf []byte, datum interface{}, codecFromKey map[string]*Codec) ([]byte, error) {
 	mapValues, err := convertMap(datum)
 	if err != nil {
 		return nil, fmt.Errorf("cannot encode textual map: %s", err)
