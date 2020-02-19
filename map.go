@@ -262,11 +262,12 @@ func genericMapTextEncoder(buf []byte, datum interface{}, defaultCodec *Codec, c
 		}
 		buf = append(buf, ':')
 
-		buf, err := fieldCodec.textualFromNative(buf, value)
+		// Encode value
+		buf, err = fieldCodec.textualFromNative(buf, value)
 		if err != nil {
+			// field was specified in datum; therefore its value was invalid
 			return nil, fmt.Errorf("cannot encode textual map: value for %q does not match its schema: %s", key, err)
 		}
-
 		buf = append(buf, ',')
 	}
 
