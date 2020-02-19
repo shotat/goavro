@@ -1,4 +1,4 @@
-module github.com/shotat/goavro/v2
+module github.com/shotat/goavro
 
 go 1.12
 
